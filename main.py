@@ -2,7 +2,7 @@
 import math
 from pathlib import Path
 from PIL import Image
-
+filepath = "Picture1png.png"
 def LFSR(seed):
     seq = '{:032b}'.format(seed, 'b')  # 32 bit binary representation
 
@@ -77,19 +77,31 @@ def ENCRYPT_COLOR(key, height, width):
     x = key
     k = (0, 0, 0)
     nr = LFSR_USE(x)[1]
-    for i in range(width):
-        nc = LFSR_USE(nr)[0]
-        for j in range(height):
-            r, g, b= pix_map[i, j]
-            r = r + nc
-            g = g + nc
-            b = b + nc
-            # p = p + nc
-            pix_map[i, j] = (r, g, b)
-            r = RC4_USE(key, k[1], k[2])
-            nc = (nc + r[0]) % 256
-        nr = LFSR_USE(nr)[1]
-
+    if filepath.endswith("jpg"):
+        for i in range(width):
+            nc = LFSR_USE(nr)[0]
+            for j in range(height):
+                r, g, b = pix_map[i, j]
+                r = r + nc
+                g = g + nc
+                b = b + nc
+                pix_map[i, j] = (r, g, b)
+                r = RC4_USE(key, k[1], k[2])
+                nc = (nc + r[0]) % 256
+            nr = LFSR_USE(nr)[1]
+    elif filepath.endswith("png"):
+        for i in range(width):
+            nc = LFSR_USE(nr)[0]
+            for j in range(height):
+                r, g, b, p = pix_map[i, j]
+                r = r + nc
+                g = g + nc
+                b = b + nc
+                p = p + nc
+                pix_map[i, j] = (r, g, b, p)
+                r = RC4_USE(key, k[1], k[2])
+                nc = (nc + r[0]) % 256
+            nr = LFSR_USE(nr)[1]
 
 # Algorithm 6 is_prime
 def IS_PRIME(number):
@@ -167,14 +179,14 @@ def Encryption(key, height, width):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     try:
-        path = Path("Picture1.jpg")
+        path = Path(filepath)
         file_name = path.name
         file_name = "encrypt"+file_name
         img = Image.open(path, 'r')
         pix_map = img.load()
         width, height = img.size
-        # Encryption(1000, int(height/2), int(width/2))
-        Encryption(1000, height, width)
+        Encryption(1000, int(height), int(width))
+        # Encryption(1000, height, width)
         # ENCRYPT_COLOR(100, int(height/2), int(width/2))
         img.show()
         img.save(file_name)
