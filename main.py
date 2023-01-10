@@ -167,14 +167,14 @@ def Encryption(key, height, width):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     try:
-        path = Path("C:\\Users\\viet6\\OneDrive\\Pictures\\genshin_21_4K.jpg")
+        path = Path("Picture1.jpg")
         file_name = path.name
         file_name = "encrypt"+file_name
         img = Image.open(path, 'r')
         pix_map = img.load()
         width, height = img.size
-        Encryption(1000, int(height), int(width))
-        # Encryption(1000, height, width)
+        # Encryption(1000, int(height/2), int(width/2))
+        Encryption(1000, height, width)
         # ENCRYPT_COLOR(100, int(height/2), int(width/2))
         img.show()
         img.save(file_name)
