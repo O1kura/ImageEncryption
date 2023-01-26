@@ -1,8 +1,10 @@
 # Algorithm 1 LFSR
 import math
 from pathlib import Path
+from random import randint
 from PIL import Image
-filepath = "Picture1png.png"
+filepath = "Screenshot 2023-01-26 130039.png"
+
 def LFSR(seed):
     seq = '{:032b}'.format(seed, 'b')  # 32 bit binary representation
 
@@ -82,10 +84,10 @@ def ENCRYPT_COLOR(key, height, width):
             nc = LFSR_USE(nr)[0]
             for j in range(height):
                 r, g, b = pix_map[i, j]
-                r = r + nc
-                g = g + nc
-                b = b + nc
-                pix_map[i, j] = (r, g, b)
+                # r = r + randint(0, 25)
+                # g = g + nc
+                # b = b + nc
+                pix_map[i, j] = (r, g, b, nc)
                 r = RC4_USE(key, k[1], k[2])
                 nc = (nc + r[0]) % 256
             nr = LFSR_USE(nr)[1]
@@ -94,14 +96,45 @@ def ENCRYPT_COLOR(key, height, width):
             nc = LFSR_USE(nr)[0]
             for j in range(height):
                 r, g, b, p = pix_map[i, j]
-                r = r + nc
-                g = g + nc
-                b = b + nc
-                p = p + nc
-                pix_map[i, j] = (r, g, b, p)
+                # r = r + randint(0, 25)
+                # g = g + nc
+                # b = b + nc
+                # p = p + nc
+                pix_map[i, j] = (r, g, b, nc)
                 r = RC4_USE(key, k[1], k[2])
                 nc = (nc + r[0]) % 256
             nr = LFSR_USE(nr)[1]
+
+# decrypt
+def DECRYPT_COLOR(key, height, width):
+    # x = key
+    # k = (0, 0, 0)
+    # nr = LFSR_USE(x)[1]
+    if filepath.endswith("jpg"):
+        for i in range(width):
+            # nc = LFSR_USE(nr)[0]
+            for j in range(height):
+                r, g, b = pix_map[i, j]
+                # r = r - randint(0, 25)
+                # g = g - nc
+                # b = b - nc
+                pix_map[i, j] = (r, g, b)
+            #     r = RC4_USE(key, k[1], k[2])
+            #     nc = (nc + r[0]) % 256
+            # nr = LFSR_USE(nr)[1]
+    elif filepath.endswith("png"):
+        for i in range(width):
+            # nc = LFSR_USE(nr)[0]
+            for j in range(height):
+                r, g, b, p = pix_map[i, j]
+                # r = r - randint(0, 25)
+                # g = g - nc
+                # b = b - nc
+                # p = p - nc
+                pix_map[i, j] = (r, g, b, 255)
+            #     r = RC4_USE(key, k[1], k[2])
+            #     nc = (nc + r[0]) % 256
+            # nr = LFSR_USE(nr)[1]
 
 # Algorithm 6 is_prime
 def IS_PRIME(number):
@@ -160,6 +193,17 @@ def SWAP(list, width, height):
             pix_map[i, j], pix_map[X[0], X[1]] = pix_map[X[0], X[1]], pix_map[i, j]
 
 
+# decrypt
+def rev_SWAP(list, width, height):
+    C = (math.ceil(height/2)) * width - 1
+    for i in reversed(range(int(height/2), height)):
+        for j in reversed(range(width)):
+            position = list[C]
+            C = C - 1
+            X = FIND(position, height, width)
+            pix_map[i, j], pix_map[X[0], X[1]] = pix_map[X[0], X[1]], pix_map[i, j]
+
+
 # Algorithm 12
 def ENCRYPT_POSITION(height, width):
     limit = height*width/2
@@ -169,11 +213,26 @@ def ENCRYPT_POSITION(height, width):
     CIG_USE(cig_list, limit)
     SWAP(cig_list, height, width)
 
+# decrypt
+def decrypt_postion(height, width):
+    limit = height * width / 2
+    h = PRIME(int(height / 2))
+    w = PRIME(width)
+    cig_list = CIG([h, w])
+    CIG_USE(cig_list, limit)
+    rev_SWAP(cig_list, height, width)
+
 
 # Algorithm 13
 def Encryption(key, height, width):
     ENCRYPT_COLOR(key, height, width)
     ENCRYPT_POSITION(height, width)
+
+
+# Decrypt
+def Decryption(key, height, width):
+    DECRYPT_COLOR(key, height, width)
+    decrypt_postion(height, width)
 
 
 # Press the green button in the gutter to run the script.
@@ -185,10 +244,19 @@ if __name__ == '__main__':
         img = Image.open(path, 'r')
         pix_map = img.load()
         width, height = img.size
-        Encryption(1000, int(height), int(width))
-        # Encryption(1000, height, width)
-        # ENCRYPT_COLOR(100, int(height/2), int(width/2))
+
+        # Encryption(1000, int(height/6), int(width/6))
+        Encryption(1000, height, width)
+        # ENCRYPT_COLOR(1000, int(height/2), int(width/2))
+        # ENCRYPT_POSITION(int(height/2), int(width/2))
+
         img.show()
-        img.save(file_name)
+        # Decryption(1000, int(height/6), int(width/6))
+        Decryption(1000, height, width)
+
+        img.show()
+
+        # img.save(file_name)
+
     except IOError:
         pass
