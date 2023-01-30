@@ -84,9 +84,9 @@ def ENCRYPT_COLOR(key, height, width):
             nc = LFSR_USE(nr)[0]
             for j in range(height):
                 r, g, b = pix_map[i, j]
-                # r = r + randint(0, 25)
-                # g = g + nc
-                # b = b + nc
+                r = (r + nc) % 256
+                g = (g + nc) % 256
+                b = (b + nc) % 256
                 pix_map[i, j] = (r, g, b, nc)
                 r = RC4_USE(key, k[1], k[2])
                 nc = (nc + r[0]) % 256
@@ -96,9 +96,9 @@ def ENCRYPT_COLOR(key, height, width):
             nc = LFSR_USE(nr)[0]
             for j in range(height):
                 r, g, b, p = pix_map[i, j]
-                # r = r + randint(0, 25)
-                # g = g + nc
-                # b = b + nc
+                r = (r + nc) % 256
+                g = (g + nc) % 256
+                b = (b + nc) % 256
                 # p = p + nc
                 pix_map[i, j] = (r, g, b, nc)
                 r = RC4_USE(key, k[1], k[2])
@@ -107,34 +107,35 @@ def ENCRYPT_COLOR(key, height, width):
 
 # decrypt
 def DECRYPT_COLOR(key, height, width):
-    # x = key
-    # k = (0, 0, 0)
-    # nr = LFSR_USE(x)[1]
+    x = key
+    k = (0, 0, 0)
+    nr = LFSR_USE(x)[1]
     if filepath.endswith("jpg"):
         for i in range(width):
-            # nc = LFSR_USE(nr)[0]
+            nc = LFSR_USE(nr)[0]
             for j in range(height):
                 r, g, b = pix_map[i, j]
-                # r = r - randint(0, 25)
-                # g = g - nc
-                # b = b - nc
+                r = (r - nc) % 256
+                g = (g - nc) % 256
+                b = (b - nc) % 256
                 pix_map[i, j] = (r, g, b)
-            #     r = RC4_USE(key, k[1], k[2])
-            #     nc = (nc + r[0]) % 256
-            # nr = LFSR_USE(nr)[1]
+                r = RC4_USE(key, k[1], k[2])
+                nc = (nc + r[0]) % 256
+            nr = LFSR_USE(nr)[1]
     elif filepath.endswith("png"):
         for i in range(width):
-            # nc = LFSR_USE(nr)[0]
+            nc = LFSR_USE(nr)[0]
             for j in range(height):
                 r, g, b, p = pix_map[i, j]
-                # r = r - randint(0, 25)
-                # g = g - nc
-                # b = b - nc
+                r = (r - nc) % 256
+                g = (g - nc) % 256
+                b = (b - nc) % 256
                 # p = p - nc
                 pix_map[i, j] = (r, g, b, 255)
-            #     r = RC4_USE(key, k[1], k[2])
-            #     nc = (nc + r[0]) % 256
-            # nr = LFSR_USE(nr)[1]
+                r = RC4_USE(key, k[1], k[2])
+                nc = (nc + r[0]) % 256
+            nr = LFSR_USE(nr)[1]
+
 
 # Algorithm 6 is_prime
 def IS_PRIME(number):
@@ -231,8 +232,8 @@ def Encryption(key, height, width):
 
 # Decrypt
 def Decryption(key, height, width):
-    DECRYPT_COLOR(key, height, width)
     decrypt_postion(height, width)
+    DECRYPT_COLOR(key, height, width)
 
 
 # Press the green button in the gutter to run the script.
@@ -255,7 +256,6 @@ if __name__ == '__main__':
         Decryption(1000, height, width)
 
         img.show()
-
         # img.save(file_name)
 
     except IOError:
